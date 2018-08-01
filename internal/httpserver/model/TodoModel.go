@@ -43,6 +43,7 @@ func (tdm *TodoModel) AllTodos() []TodoModel {
 
 func (tdm *TodoModel) CreateTodo(tm *TodoModel) bool {
 
+	commited := false
 	tx, err := tdm.db.Begin()
 	if err != nil {
 		return false
@@ -51,54 +52,70 @@ func (tdm *TodoModel) CreateTodo(tm *TodoModel) bool {
 	{
 		const query = "INSERT INTO todo VALUES($1, $2, $3, $4)"
 		_, err := tdm.db.Exec(query, tm.ID, tm.UserID, tm.Title, tm.Completed)
+
+		if !commited {
+			defer tx.Rollback()
+		}
+
 		if err != nil {
-			tx.Rollback()
 			return false
 		}
 
 	}
 
+	commited = true
 	return true
 }
 
 func (tdm *TodoModel) UpdateTodo(id string, tm *TodoModel) bool {
 
 	tx, err := tdm.db.Begin()
+	commited := false
+
 	if err != nil {
-		panic(err)
 		return false
 	}
 
 	{
 		const query = "UPDATE todo SET user_id = $1, title = $2, completed = $3 WHERE id = $4"
 		_, err := tdm.db.Exec(query, tm.UserID, tm.Title, tm.Completed, id)
-		if err != nil {
-			tx.Rollback()
-			panic(err)
-			return false
+
+		if !commited {
+			defer tx.Rollback()
 		}
 
+		if err != nil {
+			return false
+		}
 	}
+
+	commited = true
 	return true
 }
 
 func (tdm *TodoModel) DeleteTodo(id string) bool {
 
+	commited := false
 	tx, err := tdm.db.Begin()
 	if err != nil {
-		panic(err)
 		return false
 	}
 
 	{
 		const query = "DELETE FROM todo WHERE id = $1"
 		_, err := tdm.db.Exec(query, id)
+
+		if !commited {
+			defer tx.Rollback()
+		}
+
 		if err != nil {
-			tx.Rollback()
 			return false
 		}
 
 	}
+
+	commited = true
 	return true
 }
 
