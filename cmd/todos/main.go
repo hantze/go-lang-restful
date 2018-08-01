@@ -1,15 +1,19 @@
 package main
 
 import (
-  "net/http"
-  "github.com/gin-gonic/gin"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+
 	r.GET("/", func(c *gin.Context) {
-           c.String(http.StatusOK, "Ok")
+		c.String(http.StatusOK, "Hello, World!")
 	})
-	//r.Run() // listen and serve on 0.0.0.0:8080
-        http.ListenAndServe(":3333", r);
+
+	http.ListenAndServe(":3333", r)
+
+	//you can also use r.Run() with default port 8080
 }
